@@ -47,4 +47,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          aws s3 sync /var/html/nginx s3://docker-actions/monba_nginx --delete
+          aws s3 sync /etc/nginx s3://monba-nginx --delete
