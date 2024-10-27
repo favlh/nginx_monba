@@ -12,7 +12,7 @@ jobs:
       - name: Cek Status Nginx
         id: check_nginx
         run: |
-          if ! curl -s --head http://localhost:8080 | grep "200 OK" > /dev/null; then
+          if ! curl -s --head http://localhost:8888 | grep "200 OK" > /dev/null; then
             echo "Nginx tidak aktif! Melakukan restart..."
             sudo systemctl restart nginx
             echo "Nginx telah di-restart."
