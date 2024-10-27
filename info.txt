@@ -1,0 +1,2 @@
+## Sekedar Info Saja ##
+Workflow ini ditujukan untuk monitoring nginx dan backup ke S3 secara otomatis berdasarkan waktu yang telah ditentukan

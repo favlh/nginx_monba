@@ -2,8 +2,8 @@ name: Monitor Nginx & Backup To S3
 
 on:
   schedule:
-    - cron: '*/30 * * * *' 
-    - cron: '0 0 * * *'    
+    - cron: '*/10 * * * *'   # Cek status Nginx setiap 10 menit
+    - cron: '*/20 * * * *'    # Backup ke S3 setiap 20 menit    
 
 jobs:
   monitor:
@@ -42,9 +42,9 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Sinkronkan Direktori ke S3
-        if: github.event_name == 'schedule' && github.event.schedule == '0 0 * * *'
+        if: github.event_name == 'schedule' && github.event.schedule == '*/20 * * * *'  # Backup setiap 20 menit ke S3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          aws s3 sync /etc/nginx s3://docker-actions/monba_nginx --delete
+          aws s3 sync /var/html/nginx s3://docker-actions/monba_nginx --delete
