@@ -12,7 +12,7 @@ jobs:
       - name: Cek Status Nginx
         id: check_nginx
         run: |
-          if ! systemctl is-active --quiet nginx; then
+          if ! curl -s --head http://localhost:8080 | grep "200 OK" > /dev/null; then
             echo "Nginx tidak aktif! Melakukan restart..."
             sudo systemctl restart nginx
             echo "Nginx telah di-restart."
@@ -47,4 +47,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          aws s3 sync /var/www/html/ s3://docker-actions/monba_nginx --delete
+          aws s3 sync /var/html/nginx s3://docker-actions/monba_nginx --delete
