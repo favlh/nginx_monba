@@ -2,8 +2,8 @@ name: Monitor Nginx & Backup To S3
 
 on:
   schedule:
-    - cron: '*/10 * * * *'   # Cek status Nginx setiap 10 menit
-    - cron: '*/20 * * * *'    # Backup ke S3 setiap 20 menit    
+    - cron: '0 */12 * * *'   # Cek nginx every 12 hours
+    - cron: '0 0 * * *'      # Backup ke S3 every 24 hours
 
 jobs:
   monitor:
