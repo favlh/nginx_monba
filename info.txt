@@ -1,2 +1,3 @@
-## Sekedar Info Saja ##
-Workflow ini ditujukan untuk monitoring nginx dan backup ke S3 secara otomatis berdasarkan waktu yang telah ditentukan
+Just for Your Information
+
+This workflow is designed to monitor Nginx and automatically back it up to S3 based on the specified schedule.
