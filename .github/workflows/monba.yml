@@ -2,47 +2,57 @@ name: Monitor Nginx & Backup To S3
 
 on:
   schedule:
-    - cron: '0 */12 * * *'   # Cek nginx every 12 hours
-    - cron: '0 0 * * *'      # Backup ke S3 every 24 hours
+    - cron: '0 */12 * * *'   # Check Nginx every 12 hours
+    - cron: '0 0 * * *'      # Backup to S3 every 24 hours
 
 jobs:
   monitor:
     runs-on: self-hosted
     steps:
-      - name: Cek Status Nginx
+      - name: Check & Install Nginx if Not Found
+        run: |
+          if ! command -v nginx > /dev/null; then
+            echo "Nginx not found, installing..."
+            sudo apt update && sudo apt install -y nginx
+            echo "Fetching Nginx configuration from S3..."
+            aws s3 cp s3://monba-nginx/nginx.conf /etc/nginx/nginx.conf
+            sudo systemctl start nginx
+            echo "Nginx installed and started with configuration from S3."
+          fi
+
+      - name: Check Nginx Status
         id: check_nginx
         run: |
           if ! curl -s --head http://localhost:80 | grep "200 OK" > /dev/null; then
-            echo "Nginx tidak aktif! Melakukan restart..."
+            echo "Nginx is down! Restarting..."
             sudo systemctl restart nginx
-            echo "Nginx telah di-restart."
+            echo "Nginx has been restarted."
             echo "::set-output name=status::restarted"
           else
-            echo "Nginx berjalan normal."
+            echo "Nginx is running normally."
             echo "::set-output name=status::running"
           fi
 
-      - name: Notifikasi Hasil Cek
+      - name: Notification of Check Result
         run: |
           if [ "${{ steps.check_nginx.outputs.status }}" == "restarted" ]; then
-            echo "Nginx telah di-restart. Status: ${{ steps.check_nginx.outputs.status }}."
+            echo "Nginx was restarted. Status: ${{ steps.check_nginx.outputs.status }}."
           else
-            echo "Nginx berjalan normal. Status: ${{ steps.check_nginx.outputs.status }}."
+            echo "Nginx is running normally. Status: ${{ steps.check_nginx.outputs.status }}."
           fi
 
-      - name: Cek Log Kesalahan Jika Nginx Tidak Bisa Dijalankan
+      - name: Check Error Logs if Nginx Fails to Restart
         if: steps.check_nginx.outputs.status == 'restarted'
         run: |
           if ! systemctl is-active --quiet nginx; then
-            echo "Nginx masih tidak aktif! Memeriksa log kesalahan..."
+            echo "Nginx is still down! Checking error logs..."
             sudo tail -n 10 /var/log/nginx/error.log
           fi
 
   backup:
     runs-on: self-hosted
     steps:
-      - name: Sinkronkan Direktori ke S3
-        if: github.event_name == 'schedule' && github.event.schedule == '*/20 * * * *'  # Backup setiap 20 menit ke S3
+      - name: Sync Directory to S3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
