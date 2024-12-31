@@ -8,6 +8,7 @@ on:
 jobs:
   monitor:
     runs-on: self-hosted
+    timeout-minutes: 10
     steps:
       - name: Check & Install Nginx if Not Found
         run: |
@@ -51,6 +52,7 @@ jobs:
 
   backup:
     runs-on: self-hosted
+    timeout-minutes: 15  # Cancel job if no worker is available within 15 minutes
     steps:
       - name: Sync Directory to S3
         env:
